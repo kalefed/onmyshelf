@@ -41,3 +41,5 @@ coverage.xml
 client/build/
 client/node_modules/
 client/.env
+
+postgres-data/
