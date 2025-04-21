@@ -1,17 +1,17 @@
 services:
-  # client:
-  #   build: ./client
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - NEXT_PUBLIC_SERVER_URL=http://localhost:8080
-  #   volumes:
-  #     - ./client:/app
-  #     - /app/node_modules
-  #   depends_on:
-  #     - server
-  #   env_file:
-  #     - .env
+  client:
+    build: ./client
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_SERVER_URL=http://localhost:8080
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    env_file:
+      - .env
   server:
     build: ./server
     ports:
