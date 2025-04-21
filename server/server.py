@@ -2,22 +2,14 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from os import environ
+from models import db, User, Book
 
 # app instance
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:booksarekewl@postgres_db:5432/dev_db'
-db = SQLAlchemy(app)
-
-# Define a simple model
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), nullable=False, unique=True)
-    password_hash = db.Column(db.String(200), nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.now())
-    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+db.init_app(app)
 
 @app.route("/api/home", methods=['GET'])
 def hello_world():
