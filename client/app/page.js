@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 export default function Home() {
   useEffect(() => {
     console.log("Server URL:", process.env.NEXT_PUBLIC_SERVER_URL); // Log to confirm
-    fetch(process.env.NEXT_PUBLIC_SERVER_URL + "/api/home")
+    fetch(process.env.NEXT_PUBLIC_SERVER_URL + "/api/users")
       .then((response) => response.json())
       .then((data) => console.log(data));
   }, []);
