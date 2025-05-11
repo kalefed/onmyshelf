@@ -33,7 +33,13 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=${PASSWORD}
-      # - POSTGRES_USER=${USER}
       - POSTGRES_DB=${DB}
     volumes:
       - ./postgres-data/postgres:/var/lib/postgresql/data
+  db_test:
+    build: ./server
+    command: pytest
+    volumes:
+      - ./server:/app
+    depends_on:
+      - database
