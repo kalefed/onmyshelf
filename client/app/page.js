@@ -1,5 +1,5 @@
 import Image from "next/image";
-import CurrentlyReading from "../components/CurrentlyReading";
+import CurrentlyReading from "./components/CurrentlyReading";
 
 export default function Home() {
   return (
