@@ -55,7 +55,7 @@ export default function AddBookForm() {
 
   return (
     <form className={styles["book-form"]} onSubmit={handleSubmit}>
-      <h1>Add a new book</h1>
+      <h2>Add a new book</h2>
       <div className={styles["book-form__group"]}>
         <label className={styles["book-form__label"]} htmlFor="title">
           Title

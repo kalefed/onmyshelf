@@ -26,7 +26,7 @@ export default function CurrentlyReading() {
 
   return (
     <div>
-      <h1>Currently Reading</h1>
+      <h2>Currently Reading</h2>
       <div className={styles["currently-reading__books"]}>
         <ul>
           {data.map((book) => (
