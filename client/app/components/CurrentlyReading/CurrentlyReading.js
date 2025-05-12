@@ -1,5 +1,7 @@
 "use client";
-import AddBookForm from "./AddBookForm/AddBookForm";
+
+import styles from "./CurrentlyReading.module.css";
+import AddBookForm from "../AddBookForm/AddBookForm";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -23,16 +25,18 @@ export default function CurrentlyReading() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <>
+    <div>
       <h1>Currently Reading</h1>
-      <ul>
-        {data.map((book) => (
-          <li key={book.id}>
-            <strong>{book.title}</strong> by {book.author}
-          </li>
-        ))}
-      </ul>
+      <div className={styles["currently-reading__books"]}>
+        <ul>
+          {data.map((book) => (
+            <li key={book.id}>
+              <strong>{book.title}</strong> by {book.author}
+            </li>
+          ))}
+        </ul>
+      </div>
       <AddBookForm />
-    </>
+    </div>
   );
 }
