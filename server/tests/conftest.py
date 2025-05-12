@@ -1,5 +1,5 @@
 import pytest
-from models import db
+from models import db, User, Book
 from server import app as flask_app
 
 
@@ -23,4 +23,18 @@ def test_app():
 
 @pytest.fixture()
 def client(test_app):
-    return test_app.test_client()  # Return the test client for interacting with the app
+    return test_app.test_client()
+
+
+@pytest.fixture(scope="function")
+def seed_books(test_app):
+    with test_app.app_context():
+        db.session.add_all(
+            [
+                Book(id=1, title="The Hunger Games", author="Suzanne Collins"),
+                Book(id=2, title="Jade City", author="Fonda Lee"),
+            ]
+        )
+        db.session.commit()
+        yield
+        db.session.rollback()
