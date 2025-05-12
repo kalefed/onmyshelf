@@ -30,7 +30,7 @@ def get_users():
 @app.route("/api/books", methods=["POST"])
 def add_book():
     data = request.get_json()
-    new_book = Book(title=data["title"], author=data["author"], id=data["id"])
+    new_book = Book(title=data["title"], author=data["author"])
     db.session.add(new_book)
     db.session.commit()
 
