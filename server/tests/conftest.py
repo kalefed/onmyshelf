@@ -3,7 +3,7 @@ from models import db, User, Book
 from server import app as flask_app
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=True, scope="function")
 def test_app():
     flask_app.config.update(
         {
@@ -25,7 +25,7 @@ def test_app():
 def client(test_app):
     return test_app.test_client()
 
-
+# Fixture to seed book data
 @pytest.fixture(scope="function")
 def seed_books(test_app):
     with test_app.app_context():
@@ -38,3 +38,14 @@ def seed_books(test_app):
         db.session.commit()
         yield
         db.session.rollback()
+
+
+# Fixture to generate a book payload
+@pytest.fixture()
+def book_payload():
+    """Generate a book payload."""
+    return {
+        "id": 3,
+        "title": "The Raven Boys",
+        "author": "Maggie Stiefvater",
+    }

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from os import environ
@@ -30,7 +30,7 @@ def get_users():
 @app.route("/api/books", methods=["POST"])
 def add_book():
     data = request.get_json()
-    new_book = Book(title=data["title"], author=data["author"])
+    new_book = Book(title=data["title"], author=data["author"], id=data["id"])
     db.session.add(new_book)
     db.session.commit()
 
@@ -49,6 +49,11 @@ def get_books():
 @app.route("/api/books/<int:id>", methods=["GET"])
 def get_book(id):
     book = Book.query.filter_by(id=id).first()
+
+    # Handle case when the book ID does not exist
+    if not book:
+        abort(404, description=f"No Book with this id: `{id}` found")
+
     return jsonify(book.to_dict())
 
 
@@ -60,8 +65,9 @@ def delete_book(id):
     if book:
         db.session.delete(book)
         db.session.commit()
-        return jsonify({"message": "book deleted"}), 200
-    return jsonify({"message": "book not found"}), 404
+        return jsonify({"Message": "Book deleted successfully"}), 202
+    else:
+        abort(404, description=f"No Book with this id: `{id}` found")
 
 
 # Seed a default user if not exists
@@ -80,6 +86,11 @@ def get_or_create_default_user():
         print("Default user created")
     else:
         print("Default user already exists")
+
+
+@app.errorhandler(404)
+def handle_404(e):
+    return jsonify({"detail": e.description}), 404
 
 
 if __name__ == "__main__":
