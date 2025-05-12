@@ -1,0 +1,27 @@
+.book-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 400px;
+}
+
+
+.book-form__placeholder {
+    color: #747474;
+    margin: 0;
+}
+
+.book-form__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.book-form__input {
+    padding: 0.25rem;
+    font-size: 1rem;
+}
+
+.book-form__label {
+    font: bold;
+}
