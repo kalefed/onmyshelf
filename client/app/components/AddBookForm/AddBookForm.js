@@ -2,44 +2,29 @@
 
 import styles from "./AddBookForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import { addBook } from "@/app/services/books";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export default function AddBookForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
 
-  // Function to add a book using an API call
-  const addBook = async (formData) => {
-    const newBook = {
-      title: formData.get("title"),
-      author: formData.get("author"),
-    };
-
-    // Send the data to the API
-    try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/books`,
-        newBook
-      );
-      console.log("POST SUCCESS", res.data);
-      return res;
-    } catch (err) {
-      console.error("POST ERROR", err.response?.data || err.message);
-      throw err;
-    }
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("showModal"); // or set it to false
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  // Mutations
+  // Mutations to add a book
   const mutation = useMutation({
     mutationFn: addBook,
-    onSuccess: (data) => {
-      setMessage("Book added successfully!");
-      console.log("Mutation success — invalidating books query");
+    onSuccess: async () => {
+      closeModal();
       queryClient.invalidateQueries({ queryKey: ["books"] });
-      router.push("/", { scroll: false });
     },
-    onError: (error) => {
+    onError: () => {
       setMessage("Failed to add book. Please try again.");
     },
   });
@@ -47,11 +32,8 @@ export default function AddBookForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Get the form data
-    const formData = new FormData(e.target);
-
     // Call the mutation's mutate function to trigger the request
-    mutation.mutate(formData);
+    mutation.mutate(new FormData(e.target));
 
     e.target.reset();
   };
