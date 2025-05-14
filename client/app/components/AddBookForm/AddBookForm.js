@@ -3,8 +3,10 @@
 import styles from "./AddBookForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function AddBookForm() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   // Function to add a book using an API call
@@ -35,6 +37,7 @@ export default function AddBookForm() {
       setMessage("Book added successfully!");
       console.log("Mutation success — invalidating books query");
       queryClient.invalidateQueries({ queryKey: ["books"] });
+      router.push("/", { scroll: false });
     },
     onError: (error) => {
       setMessage("Failed to add book. Please try again.");
@@ -65,6 +68,7 @@ export default function AddBookForm() {
           type="text"
           id="title"
           name="title"
+          required
         />
         <p className={styles["book-form__placeholder"]}>Jade City</p>
       </div>
@@ -77,6 +81,7 @@ export default function AddBookForm() {
           type="text"
           id="author"
           name="author"
+          required
         ></input>
         <p className={styles["book-form__placeholder"]}>Fonda Lee</p>
       </div>

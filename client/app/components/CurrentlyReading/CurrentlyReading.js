@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import styles from "./CurrentlyReading.module.css";
-import AddBookForm from "../AddBookForm/AddBookForm";
+import BookFormModal from "../AddBookForm/BookFormModal";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -35,8 +36,11 @@ export default function CurrentlyReading() {
             </li>
           ))}
         </ul>
+        <button>
+          <Link href="">Add a book</Link>
+        </button>
       </div>
-      <AddBookForm />
+      <BookFormModal />
     </div>
   );
 }
