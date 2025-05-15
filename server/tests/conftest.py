@@ -25,6 +25,7 @@ def test_app():
 def client(test_app):
     return test_app.test_client()
 
+
 # Fixture to seed book data
 @pytest.fixture(scope="function")
 def seed_books(test_app):
@@ -45,7 +46,30 @@ def seed_books(test_app):
 def book_payload():
     """Generate a book payload."""
     return {
-        "id": 3,
         "title": "The Raven Boys",
         "author": "Maggie Stiefvater",
     }
+
+
+# Fixture to register a user
+@pytest.fixture()
+def register_user(client):
+    def _register(username, email, password):
+        return client.post(
+            "/api/register",
+            json={"username": username, "email": email, "password": password},
+        )
+
+    return _register
+
+
+# Fixture to login a user
+@pytest.fixture()
+def login_user(client):
+    def _login(username, password):
+        return client.post(
+            "/api/login",
+            json={"username": username, "password": password},
+        )
+
+    return _login
