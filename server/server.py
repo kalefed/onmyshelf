@@ -12,6 +12,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
 )
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import select
 
 from models import db, Book, User, TokenBlocklist, Shelf
 
@@ -80,13 +81,13 @@ def register():
         email=email,
     )
     new_user.set_password(password)
-    
+
     # Add default shelves for the new user
     default_shelves = ["currently-reading", "tbr", "up-next", "dnf"]
     for shelf_type in default_shelves:
         shelf = Shelf(shelf_type=shelf_type, user=new_user)
         db.session.add(shelf)
-     
+
     db.session.add(new_user)
     db.session.commit()
 
@@ -141,16 +142,43 @@ def get_shelves():
     current_user = get_jwt_identity()
 
     # Get all books associated with the user
-    users_shelves = db.session.execute(
-        db.select(Shelf).filter(Shelf.user_id == current_user)
-    ).scalars().all()
-    
-    print(users_shelves)
-    
-    # Get a user's shelves with associated books
-    shelves = {}
-    
-    
+    stmt = select(Shelf).filter_by(user_id=current_user)
+    users_shelves = db.session.execute(stmt).scalars().all()
+
+    # If the user does not have any shelves
+    if not users_shelves:
+        return jsonify({"message": "No shelves found for this user."}), 404
+
+    shelves_data = [shelf.to_dict() for shelf in users_shelves]
+
+    return jsonify(shelves_data), 200
+
+
+# Get all books on a specific shelf
+@app.route("/api/shelves/<str:shelf_type>", methods=["GET"])
+@jwt_required()
+def get_shelf_books(shelf_type):
+    data = request.get_json()
+    current_user = get_jwt_identity()
+
+    stmt = select(Shelf).filter_by(user_id=current_user, shelf_type=shelf_type)
+
+    # Execute the query
+    users_shelf = db.session.execute(stmt).scalars().all()
+
+    # If the user does not have any shelves
+    if not users_shelf:
+        return jsonify({"message": "No shelves found for this user."}), 404
+
+    return jsonify(users_shelf.to_dict()), 200
+
+
+# # Move a new book from one shelf to another
+# @app.route("/api/shelves/<str:id>/books", methods=["POST"])
+# @jwt_required()
+# def move_book_on_shelf():
+#     data = request.get_json()
+#     book = Book.query
 
 
 # Add a new book
