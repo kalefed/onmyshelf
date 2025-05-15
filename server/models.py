@@ -1,18 +1,27 @@
 import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import Mapped, mapped_column, ForeignKey, relationship
-
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
+
+
+class TokenBlocklist(db.Model):
+    __tablename__ = "token-blacklist"
+
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(36), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, nullable=False)
 
 
 class User(db.Model):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(db.String(100), nullable=False, unique=True)
+    username: Mapped[str] = mapped_column(db.String(25), nullable=False, unique=True)
     email: Mapped[str] = mapped_column(db.String(100), nullable=False, unique=True)
-    password_hash: Mapped[str] = mapped_column(db.String(200), nullable=False)
+    password: Mapped[str] = mapped_column(db.String(255), nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(default=db.func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(
         default=db.func.now(), onupdate=db.func.now()
@@ -24,6 +33,13 @@ class User(db.Model):
     books: Mapped[list["Book"]] = relationship(
         "Book", secondary="user_books", viewonly=True, back_populates="users"
     )
+
+    # Helper functions
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 
 class Book(db.Model):

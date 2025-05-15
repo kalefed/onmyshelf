@@ -4,3 +4,5 @@ Flask-SQLAlchemy
 psycopg2-binary
 pytest
 pytest-flask
+flask_jwt_extended
+python-dotenv
