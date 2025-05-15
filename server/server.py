@@ -113,7 +113,7 @@ def login():
             200,
         )
     else:
-        return jsonify({"message": "Invalid email or password."}), 401
+        return jsonify({"message": "Invalid username or password."}), 401
 
 
 # Logout endpoint for revoking the current users access token
