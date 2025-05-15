@@ -104,7 +104,6 @@ def login():
     print("Received data:", username, password)
 
     user = User.query.filter_by(username=username).first()
-    print(user)
 
     # if the user exists and the password check is successful
     if user and user.check_password(password):
@@ -155,10 +154,9 @@ def get_shelves():
 
 
 # Get all books on a specific shelf
-@app.route("/api/shelves/<str:shelf_type>", methods=["GET"])
+@app.route("/api/shelves/<string:shelf_type>", methods=["GET"])
 @jwt_required()
 def get_shelf_books(shelf_type):
-    data = request.get_json()
     current_user = get_jwt_identity()
 
     stmt = select(Shelf).filter_by(user_id=current_user, shelf_type=shelf_type)
@@ -173,49 +171,58 @@ def get_shelf_books(shelf_type):
     return jsonify(users_shelf.to_dict()), 200
 
 
-# # Move a new book from one shelf to another
-# @app.route("/api/shelves/<str:id>/books", methods=["POST"])
-# @jwt_required()
-# def move_book_on_shelf():
-#     data = request.get_json()
-#     book = Book.query
-
-
-# Add a new book
-@app.route("/api/books", methods=["POST"])
-def add_book():
+# Add a new book to a specific shelf
+# TODO - does it make sense to have a shelf_id?
+@app.route("/api/shelves/<string:shelf_id>/books", methods=["POST"])
+@jwt_required()
+def add_book(shelf_id):
     data = request.get_json()
-    new_book = Book(title=data["title"], author=data["author"])
-    db.session.add(new_book)
+
+    # Does the shelf exist?
+    stmt = select(Shelf).filter_by(id=data["shelf_id"]).first()
+    shelf = db.session.execute(stmt).scalars()
+
+    if shelf:
+        new_book = Book(title=data["title"], author=data["author"], shelf_id=shelf_id)
+        db.session.add(new_book)
+        db.session.commit()
+
+    else:
+        abort(404, description=f"No shelf with this id: `{shelf_id}` found")
+
+
+# Move a new book from one shelf to another
+@app.route("/api/shelves/<string:shelf_id>/books<int:id>", methods=["PUT"])
+@jwt_required()
+def move_book(shelf_id, id):
+    data = request.get_json()
+
+    # Does the book exist?
+    stmt = select(Book).filter_by(id=id, shelf_id=shelf_id).first()
+    book = db.session.execute(stmt).scalars()
+
+    # Does the shelf exist?
+    stmt = select(Shelf).filter_by(id=data["shelf_id"]).first()
+    new_shelf = db.session.execute(stmt).scalars()
+
+    if not book:
+        return jsonify({"message": "Book not found"}), 404
+
+    if not new_shelf:
+        return jsonify({"message": "Shelf not found"}), 404
+
+    # move the book to a new shelf
+    book.shelf_id = data["shelf_id"]
     db.session.commit()
 
-    return {"message": "Book added successfully"}, 201
 
-
-# Get all books
-@app.route("/api/books", methods=["GET"])
-def get_books():
-    # Query all books from the database
-    books = Book.query.all()
-    return jsonify([book.to_dict() for book in books])
-
-
-# Get a book by ID
-@app.route("/api/books/<int:id>", methods=["GET"])
-def get_book(id):
-    book = Book.query.filter_by(id=id).first()
-
-    # Handle case when the book ID does not exist
-    if not book:
-        abort(404, description=f"No Book with this id: `{id}` found")
-
-    return jsonify(book.to_dict())
-
-
-# Delete a book
-@app.route("/api/books/<int:id>", methods=["DELETE"])
-def delete_book(id):
-    book = Book.query.filter_by(id=id).first()
+# Delete a book from a shelf
+@app.route("/api/shelves/<string:shelf_id>/books<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_book(shelf_id, id):
+    # Get the book to delete
+    stmt = select(Book).filter_by(id=id, shelf_id=shelf_id).first()
+    book = db.session.execute(stmt).scalars()
 
     if book:
         db.session.delete(book)
