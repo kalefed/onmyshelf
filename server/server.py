@@ -9,10 +9,11 @@ from flask_jwt_extended import (
     create_access_token,
     get_jwt,
     jwt_required,
+    get_jwt_identity,
 )
 from flask_sqlalchemy import SQLAlchemy
 
-from models import db, Book, User, TokenBlocklist
+from models import db, Book, User, TokenBlocklist, Shelf
 
 load_dotenv()
 
@@ -79,7 +80,13 @@ def register():
         email=email,
     )
     new_user.set_password(password)
-
+    
+    # Add default shelves for the new user
+    default_shelves = ["currently-reading", "tbr", "up-next", "dnf"]
+    for shelf_type in default_shelves:
+        shelf = Shelf(shelf_type=shelf_type, user=new_user)
+        db.session.add(shelf)
+     
     db.session.add(new_user)
     db.session.commit()
 
@@ -125,6 +132,25 @@ def modify_token():
     db.session.add(TokenBlocklist(jti=jti, created_at=now))
     db.session.commit()
     return jsonify({"message": "User logged out successfully"}), 200
+
+
+# Get user's books (all shelves)
+@app.route("/api/shelves", methods=["GET"])
+@jwt_required()
+def get_shelves():
+    current_user = get_jwt_identity()
+
+    # Get all books associated with the user
+    users_shelves = db.session.execute(
+        db.select(Shelf).filter(Shelf.user_id == current_user)
+    ).scalars().all()
+    
+    print(users_shelves)
+    
+    # Get a user's shelves with associated books
+    shelves = {}
+    
+    
 
 
 # Add a new book
