@@ -1,7 +1,7 @@
 import styles from "./Page.module.css";
-import CurrentlyReading from "./components/CurrentlyReading/CurrentlyReading";
-import ToBeRead from "./components/ToBeRead/ToBeRead";
-import BookFormModal from "./components/AddBookForm/BookFormModal";
+import CurrentlyReading from "../components/CurrentlyReading/CurrentlyReading";
+import ToBeRead from "../components/ToBeRead/ToBeRead";
+import BookFormModal from "../components/AddBookForm/BookFormModal";
 
 export default async function Home({ searchParams }) {
   const { showModal } = await searchParams;

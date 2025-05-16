@@ -6,7 +6,7 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { getBooks } from "@/app/services/books";
+import { getBooks } from "@/services/books";
 import CurrentlyReadingBooks from "./Books";
 
 export default async function CurrentlyReading() {

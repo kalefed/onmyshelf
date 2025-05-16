@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getBooks } from "@/app/services/books";
+import { getBooks } from "@/services/books";
 
 export default function CurrentlyReadingBooks() {
   const { data, error, isLoading } = useQuery({
