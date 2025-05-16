@@ -10,7 +10,7 @@ export default async function Home({ searchParams }) {
     <div>
       <h1>Home Page</h1>
       <div className={styles["home"]}>
-        <CurrentlyReading />
+        {/* <CurrentlyReading /> */}
         <h2>Reading Streak</h2>
         <ToBeRead />
         <h2>Monthly Reading Stats</h2>
