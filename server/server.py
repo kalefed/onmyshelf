@@ -9,10 +9,12 @@ from flask_jwt_extended import (
     create_access_token,
     get_jwt,
     jwt_required,
+    get_jwt_identity,
 )
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import select
 
-from models import db, Book, User, TokenBlocklist
+from models import db, Book, User, TokenBlocklist, Shelf
 
 load_dotenv()
 
@@ -80,6 +82,12 @@ def register():
     )
     new_user.set_password(password)
 
+    # Add default shelves for the new user
+    default_shelves = ["currently-reading", "tbr", "up-next", "dnf"]
+    for shelf_type in default_shelves:
+        shelf = Shelf(shelf_type=shelf_type, user=new_user)
+        db.session.add(shelf)
+
     db.session.add(new_user)
     db.session.commit()
 
@@ -96,7 +104,6 @@ def login():
     print("Received data:", username, password)
 
     user = User.query.filter_by(username=username).first()
-    print(user)
 
     # if the user exists and the password check is successful
     if user and user.check_password(password):
@@ -127,48 +134,129 @@ def modify_token():
     return jsonify({"message": "User logged out successfully"}), 200
 
 
-# Add a new book
-@app.route("/api/books", methods=["POST"])
-def add_book():
+# Get user's books (all shelves)
+@app.route("/api/shelves", methods=["GET"])
+@jwt_required()
+def get_shelves():
+    current_user = get_jwt_identity()
+
+    # Get all books associated with the user
+    stmt = select(Shelf).filter_by(user_id=current_user)
+    users_shelves = db.session.execute(stmt).scalars().all()
+
+    # If the user does not have any shelves
+    if not users_shelves:
+        return jsonify({"message": "No shelves found for this user."}), 404
+
+    shelves_data = [shelf.to_dict() for shelf in users_shelves]
+
+    return jsonify(shelves_data), 200
+
+
+# Get all books on a specific shelf
+@app.route("/api/shelves/<string:shelf_type>/books", methods=["GET"])
+@jwt_required()
+def get_shelf_books(shelf_type):
+    current_user = get_jwt_identity()
+
+    # Check if the shelf exists for this user
+    shelf_test = db.session.execute(
+        select(Shelf).where(
+            Shelf.user_id == current_user, Shelf.shelf_type == shelf_type
+        )
+    ).scalar_one_or_none()
+
+    if shelf_test is None:
+        return jsonify({"error": f"Shelf '{shelf_type}' not found for this user."}), 404
+
+    stmt = (
+        select(Book)
+        .join(Book.shelf)
+        .where(Shelf.user_id == current_user, Shelf.shelf_type == shelf_type)
+    )
+
+    # Execute the query
+    users_shelf = db.session.execute(stmt).scalars().all()
+
+    return jsonify([shelf.to_dict() for shelf in users_shelf]), 200
+
+
+# Add a new book to a specific shelf
+@app.route("/api/shelves/<int:shelf_id>/books", methods=["POST"])
+@jwt_required()
+def add_book(shelf_id):
     data = request.get_json()
-    new_book = Book(title=data["title"], author=data["author"])
-    db.session.add(new_book)
+    current_user = get_jwt_identity()
+
+    # Does the shelf exist?
+    stmt = select(Shelf).filter_by(id=shelf_id, user_id=current_user)
+    shelf = db.session.execute(stmt).scalars().first()
+
+    if shelf:
+        new_book = Book(title=data["title"], author=data["author"], shelf_id=shelf_id)
+        db.session.add(new_book)
+        db.session.commit()
+
+        return (
+            jsonify(
+                {
+                    "message": "Book added successfully.",
+                    "book": {
+                        "id": new_book.id,
+                        "title": new_book.title,
+                        "author": new_book.author,
+                        "shelf_id": new_book.shelf_id,
+                    },
+                }
+            ),
+            201,
+        )
+
+    else:
+        abort(404, description=f"No shelf with this id: `{shelf_id}` found.")
+
+
+# Move a new book from one shelf to another
+@app.route("/api/shelves/<int:shelf_id>/books/<int:id>", methods=["PUT"])
+@jwt_required()
+def move_book(shelf_id, id):
+    data = request.get_json()
+
+    # First, check if the shelf exists
+    stmt = select(Shelf).filter_by(id=data["shelf_id"])
+    new_shelf = db.session.execute(stmt).scalars().one_or_none()
+
+    if not new_shelf:
+        return jsonify({"message": "Shelf not found"}), 404
+
+    # Then, check if the book exists
+    stmt = select(Book).filter_by(id=id, shelf_id=shelf_id)
+    book = db.session.execute(stmt).scalars().one_or_none()
+
+    if not book:
+        return jsonify({"message": "Book not found"}), 404
+
+    # Move the book to the new shelf
+    book.shelf_id = data["shelf_id"]
     db.session.commit()
 
-    return {"message": "Book added successfully"}, 201
+    return jsonify({"message": "Book moved successfully"}), 201
 
 
-# Get all books
-@app.route("/api/books", methods=["GET"])
-def get_books():
-    # Query all books from the database
-    books = Book.query.all()
-    return jsonify([book.to_dict() for book in books])
-
-
-# Get a book by ID
-@app.route("/api/books/<int:id>", methods=["GET"])
-def get_book(id):
-    book = Book.query.filter_by(id=id).first()
-
-    # Handle case when the book ID does not exist
-    if not book:
-        abort(404, description=f"No Book with this id: `{id}` found")
-
-    return jsonify(book.to_dict())
-
-
-# Delete a book
-@app.route("/api/books/<int:id>", methods=["DELETE"])
-def delete_book(id):
-    book = Book.query.filter_by(id=id).first()
+# Delete a book from a shelf
+@app.route("/api/shelves/<string:shelf_id>/books/<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_book(shelf_id, id):
+    # Get the book to delete
+    stmt = select(Book).filter_by(id=id, shelf_id=shelf_id)
+    book = db.session.execute(stmt).scalars().one_or_none()
 
     if book:
         db.session.delete(book)
         db.session.commit()
-        return jsonify({"Message": "Book deleted successfully"}), 202
+        return jsonify({"message": "Book deleted successfully"}), 202
     else:
-        abort(404, description=f"No Book with this id: `{id}` found")
+        abort(404, description=f"No Book with this id: `{id}` found.")
 
 
 # Seed a default user if not exists
@@ -191,7 +279,7 @@ def get_or_create_default_user():
 
 @app.errorhandler(404)
 def handle_404(e):
-    return jsonify({"detail": e.description}), 404
+    return jsonify({"error": e.description}), 404
 
 
 if __name__ == "__main__":
