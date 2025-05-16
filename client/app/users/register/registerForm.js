@@ -1,10 +1,36 @@
+"use client";
+
 import styles from "./registerForm.module.css";
+import { useMutation } from "@tanstack/react-query";
+import { userRegister } from "@/services/users";
 
 export default function RegisterForm() {
+  // Mutations to register a user
+  const mutation = useMutation({
+    mutationFn: userRegister,
+    onSuccess: async () => {
+      console.log("successsss");
+      pass;
+      // todo - cookie stuff?
+    },
+    onError: () => {
+      setMessage("Failed to register. Please try again.");
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Call the mutation's mutate function to trigger the request
+    mutation.mutate(new FormData(e.target));
+  };
+
   return (
-    <form className={styles["register-form"]}>
+    <form className={styles["register-form"]} onSubmit={handleSubmit}>
       <div className={styles["register-form__group"]}>
-        <label className={styles["register-form__label"]}>Email address</label>
+        <label htmlFor="email" className={styles["register-form__label"]}>
+          Email address
+        </label>
         <input
           className={styles["register-form__input"]}
           id="email"
@@ -14,7 +40,9 @@ export default function RegisterForm() {
         />
       </div>
       <div className={styles["register-form__group"]}>
-        <label className={styles["register-form__label"]}>Username</label>
+        <label htmlFor="username" className={styles["register-form__label"]}>
+          Username
+        </label>
         <input
           className={styles["register-form__input"]}
           id="username"
@@ -24,7 +52,9 @@ export default function RegisterForm() {
         />
       </div>
       <div className={styles["register-form__group"]}>
-        <label className={styles["register-form__label"]}>Password</label>
+        <label htmlFor="password" className={styles["register-form__label"]}>
+          Password
+        </label>
         <input
           className={styles["register-form__input"]}
           id="password"
@@ -33,18 +63,6 @@ export default function RegisterForm() {
           required
         />
       </div>
-      {/* <div className={styles["register-form__group"]}>
-        <label className={styles["register-form__label"]}>
-          Password confirmation
-        </label>
-        <input
-          className={styles["register-form__input"]}
-          id="password_conf"
-          type="password"
-          name="password_conf"
-          required
-        />
-      </div> */}
       <button type="submit">Register</button>
     </form>
   );

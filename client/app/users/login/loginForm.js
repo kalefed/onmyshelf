@@ -1,10 +1,36 @@
+"use client";
+
 import styles from "./loginForm.module.css";
+import { useMutation } from "@tanstack/react-query";
+import { userLogin } from "@/services/users";
 
 export default function LoginForm() {
+  // Mutations to log a user in
+  const mutation = useMutation({
+    mutationFn: userLogin,
+    onSuccess: async () => {
+      console.log("successsss");
+      pass;
+      // todo - cookie stuff?
+    },
+    onError: () => {
+      setMessage("Failed to login. Please try again.");
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Call the mutation's mutate function to trigger the request
+    mutation.mutate(new FormData(e.target));
+  };
+
   return (
-    <form className={styles["login-form"]}>
+    <form className={styles["login-form"]} onSubmit={handleSubmit}>
       <div className={styles["login-form__group"]}>
-        <label className={styles["login-form__label"]}>Username</label>
+        <label htmlFor="username" className={styles["login-form__label"]}>
+          Username
+        </label>
         <input
           className={styles["login-form__input"]}
           id="username"
@@ -14,7 +40,9 @@ export default function LoginForm() {
         />
       </div>
       <div className={styles["login-form__group"]}>
-        <label className={styles["login-form__label"]}>Password</label>
+        <label htmlFor="password" className={styles["login-form__label"]}>
+          Password
+        </label>
         <input
           className={styles["login-form__input"]}
           id="password"
