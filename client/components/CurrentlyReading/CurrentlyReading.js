@@ -5,7 +5,7 @@ import CurrentlyReadingBooks from "./Books";
 export default async function CurrentlyReading() {
   return (
     <div className={styles["currently-reading__container"]}>
-      <h2>Currently Reading</h2>
+      <h3>Currently Reading</h3>
       <div className={styles["currently-reading__books"]}>
         <CurrentlyReadingBooks />
         <button>

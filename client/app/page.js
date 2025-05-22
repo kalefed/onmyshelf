@@ -15,19 +15,19 @@ export default async function Home({ searchParams }) {
       <h1 className={styles["heading"]}>Welcome back, Kaleigh</h1>
       <div className={styles["home"]}>
         <div className={styles["placeholder"]}>
-          <h2>Reading Challenge</h2>
+          <h3>Reading Challenge</h3>
         </div>
         <div className={`${styles.placeholder} ${styles.placeholderStreaks}`}>
-          <h2>Reading Streaks</h2>
+          <h3>Reading Streaks</h3>
         </div>
         <div className={styles["placeholder"]}>
-          <h2>Other</h2>
+          <h3>Other</h3>
         </div>
         <div className={styles["home_currently-reading"]}>
           <CurrentlyReading />
         </div>
         <div className={styles["placeholder_1"]}>
-          <h2>Reading Stats</h2>
+          <h3>Reading Stats</h3>
         </div>
         <div className={styles["home_want-to-read"]}>
           <WantToRead />
