@@ -10,12 +10,13 @@ export const userLogin = async (formData) => {
   try {
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/login`,
-      newUser
+      newUser,
+      { withCredentials: true }
     );
+
     console.log("LOGIN SUCCESS", response.data);
     return response;
   } catch (err) {
-    console.error("LOGIN ERROR", err.response?.data || err.message);
     throw err;
   }
 };

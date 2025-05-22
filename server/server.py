@@ -24,7 +24,7 @@ load_dotenv()
 
 # app instance
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*"}})
 
 # Configuration
 ACCESS_EXPIRES = timedelta(hours=1)
@@ -32,7 +32,7 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
-app.config["JWT_COOKIE_SECURE"] = True  # TODO - not sure about this
+app.config["JWT_COOKIE_SECURE"] = False  # TODO - not sure about this
 app.config["JWT_COOKIE_CSRF_PROTECT"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
