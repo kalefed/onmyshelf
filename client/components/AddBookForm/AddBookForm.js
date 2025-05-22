@@ -2,7 +2,7 @@
 
 import styles from "./AddBookForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addBook } from "@/app/services/books";
+import { addBook } from "@/services/books";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export default function AddBookForm() {

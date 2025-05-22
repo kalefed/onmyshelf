@@ -6,24 +6,24 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { getBooks } from "@/app/services/books";
+import { getBooksOnShelf } from "@/services/books";
 import CurrentlyReadingBooks from "./Books";
 
 export default async function CurrentlyReading() {
-  const queryClient = new QueryClient();
+  // const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: ["books"],
-    queryFn: getBooks,
-  });
+  // await queryClient.prefetchQuery({
+  //   queryKey: ["books"],
+  //   queryFn: getBooksOnShelf,
+  // });
 
   return (
     <div>
       <h2>Currently Reading</h2>
       <div className={styles["currently-reading__books"]}>
-        <HydrationBoundary state={dehydrate(queryClient)}>
-          <CurrentlyReadingBooks />
-        </HydrationBoundary>
+        {/* <HydrationBoundary state={dehydrate(queryClient)}> */}
+        <CurrentlyReadingBooks />
+        {/* </HydrationBoundary> */}
         <button>
           <Link href="/?showModal=true">Add a book</Link>
         </button>
