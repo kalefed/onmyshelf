@@ -1,13 +1,13 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export const getBooksOnShelf = async () => {
+export const getBooksOnShelf = async (shelf_type) => {
   // Get the CSRF token from the cookie
   const csrfToken = Cookies.get("csrf_access_token");
 
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/shelves/currently-reading/books`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/shelves/${shelf_type}/books`,
 
       {
         headers: {
@@ -38,7 +38,7 @@ export const addBook = async (formData) => {
   // Send the data to the API
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/shelves/1/books`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/shelves/5/books`,
       newBook,
       {
         headers: {
