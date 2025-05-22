@@ -24,7 +24,12 @@ load_dotenv()
 
 # app instance
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*"}})
+CORS(
+    app,
+    supports_credentials=True,
+    resources={r"/api/*": {"origins": "http://localhost:3000"}},
+)
+
 
 # Configuration
 ACCESS_EXPIRES = timedelta(hours=1)
@@ -36,7 +41,7 @@ app.config["JWT_COOKIE_SECURE"] = False  # TODO - not sure about this
 app.config["JWT_COOKIE_CSRF_PROTECT"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_COOKIE_SAMESITE"] = "None"
+app.config["JWT_COOKIE_SAMESITE"] = "Lax"
 
 # DB initialization
 db.init_app(app)
@@ -133,7 +138,7 @@ def login():
             "csrf_access_token",
             csrf_token,
             secure=False,  # True in production
-            samesite="None",
+            samesite="Lax",
             httponly=False,  # Important: JS needs to read this!
         )
 
