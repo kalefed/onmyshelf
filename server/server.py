@@ -10,6 +10,10 @@ from flask_jwt_extended import (
     get_jwt,
     jwt_required,
     get_jwt_identity,
+    set_access_cookies,
+    create_refresh_token,
+    get_csrf_token,
+    unset_jwt_cookies,
 )
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
@@ -27,9 +31,12 @@ ACCESS_EXPIRES = timedelta(hours=1)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
-app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+app.config["JWT_COOKIE_SECURE"] = True  # TODO - not sure about this
+app.config["JWT_COOKIE_CSRF_PROTECT"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JWT_COOKIE_SAMESITE"] = "None"
 
 # DB initialization
 db.init_app(app)
@@ -108,17 +115,29 @@ def login():
     # if the user exists and the password check is successful
     if user and user.check_password(password):
         access_token = create_access_token(identity=str(user.id))
-        # refresh_token = create_refresh_token(identity=username)
-        return (
-            jsonify(
-                {
-                    "message": f"Logged in as {username}",
-                    "access_token": access_token,
-                    # "refresh_token": refresh_token,
-                }
-            ),
-            200,
+        refresh_token = create_refresh_token(identity=str(user.id))
+        response = jsonify(
+            {
+                "message": f"Logged in as {username}",
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+            }
         )
+
+        set_access_cookies(response, access_token)
+        response.status_code = 200
+
+        # Set CSRF token in a separate cookie
+        csrf_token = get_csrf_token(access_token)
+        response.set_cookie(
+            "csrf_access_token",
+            csrf_token,
+            secure=False,  # True in production
+            samesite="None",
+            httponly=False,  # Important: JS needs to read this!
+        )
+
+        return response
     else:
         return jsonify({"message": "Invalid username or password."}), 401
 
@@ -131,7 +150,9 @@ def modify_token():
     now = datetime.now(timezone.utc)
     db.session.add(TokenBlocklist(jti=jti, created_at=now))
     db.session.commit()
-    return jsonify({"message": "User logged out successfully"}), 200
+    response = jsonify({"message": "User logged out successfully"}), 200
+    unset_jwt_cookies(response)
+    return response
 
 
 # Get user's books (all shelves)
@@ -146,7 +167,8 @@ def get_shelves():
 
     # If the user does not have any shelves
     if not users_shelves:
-        return jsonify({"message": "No shelves found for this user."}), 404
+        return jsonify([]), 200
+        # return jsonify({"message": "No shelves found for this user."}), 404
 
     shelves_data = [shelf.to_dict() for shelf in users_shelves]
 
