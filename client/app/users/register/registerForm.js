@@ -3,15 +3,16 @@
 import styles from "./registerForm.module.css";
 import { useMutation } from "@tanstack/react-query";
 import { userRegister } from "@/services/users";
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
+  const router = useRouter();
+
   // Mutations to register a user
   const mutation = useMutation({
     mutationFn: userRegister,
     onSuccess: async () => {
-      console.log("successsss");
-      pass;
-      // todo - cookie stuff?
+      router.push("/users/login"); // route the user to login page
     },
     onError: () => {
       setMessage("Failed to register. Please try again.");

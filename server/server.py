@@ -155,7 +155,8 @@ def modify_token():
     now = datetime.now(timezone.utc)
     db.session.add(TokenBlocklist(jti=jti, created_at=now))
     db.session.commit()
-    response = jsonify({"message": "User logged out successfully"}), 200
+    response = jsonify({"message": "User logged out successfully"})
+    response.status_code = 200
     unset_jwt_cookies(response)
     return response
 
@@ -271,7 +272,7 @@ def move_book(shelf_id, id):
 
 
 # Delete a book from a shelf
-@app.route("/api/shelves/<string:shelf_id>/books/<int:id>", methods=["DELETE"])
+@app.route("/api/shelves/<int:shelf_id>/books/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_book(shelf_id, id):
     # Get the book to delete
@@ -299,6 +300,15 @@ def get_or_create_default_user():
         )
         db.session.add(user)
         db.session.commit()
+
+        # Create default shelves
+        default_shelves = ["currently-reading", "tbr", "up-next", "dnf"]
+        for shelf_type in default_shelves:
+            shelf = Shelf(shelf_type=shelf_type, user=user)
+            db.session.add(shelf)
+
+        db.session.commit()
+
         print("Default user created")
     else:
         print("Default user already exists")
