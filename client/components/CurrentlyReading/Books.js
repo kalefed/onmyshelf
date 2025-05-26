@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getBooksOnShelf } from "@/services/books";
+import Link from "next/link";
 
 export default function CurrentlyReadingBooks() {
   const shelf_type = "currently-reading";
@@ -19,10 +20,12 @@ export default function CurrentlyReadingBooks() {
     <ul className="flex flex-row gap-x-8">
       {data.map((book) => (
         <li key={book.id}>
-          <div className="outline-1 pl-4 outline-gray-300 rounded-md h-45 w-35 mb-2"></div>
-          <strong className="block text-sm/6">{book.title}</strong>
-          <p className="block text-sm/6">{book.author}</p>
-          <p className="block text-sm/6 text-gray-500">25%</p> 
+          <Link href={`/books/${book.id}`}>
+            <div className="outline-1 pl-4 outline-gray-300 rounded-md h-45 w-35 mb-2"></div>
+            <strong className="block text-sm/6">{book.title}</strong>
+            <p className="block text-sm/6">{book.author}</p>
+            <p className="block text-sm/6 text-gray-500">25%</p>
+          </Link>
         </li>
       ))}
     </ul>
