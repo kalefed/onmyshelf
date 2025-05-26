@@ -1,12 +1,10 @@
 import Link from "next/link";
-import styles from "./CurrentlyReading.module.css";
 import CurrentlyReadingBooks from "./Books";
 
 export default async function CurrentlyReading() {
   return (
-    <div className={styles["currently-reading__container"]}>
-      <h3>Currently Reading</h3>
-      <div className={styles["currently-reading__books"]}>
+    <div>
+      <div>
         <CurrentlyReadingBooks />
         <button>
           <Link href="/?showModal=true">Add a book</Link>
