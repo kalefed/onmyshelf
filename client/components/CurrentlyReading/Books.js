@@ -16,10 +16,13 @@ export default function CurrentlyReadingBooks() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <ul>
+    <ul className="flex flex-row gap-x-8">
       {data.map((book) => (
         <li key={book.id}>
-          <strong>{book.title}</strong> by {book.author}
+          <div className="outline-1 pl-4 outline-gray-300 rounded-md h-45 w-35 mb-2"></div>
+          <strong className="block text-sm/6">{book.title}</strong>
+          <p className="block text-sm/6">{book.author}</p>
+          <p className="block text-sm/6 text-gray-500">25%</p> 
         </li>
       ))}
     </ul>

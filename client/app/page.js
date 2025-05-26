@@ -32,7 +32,7 @@ export default async function Home({ searchParams }) {
 
         {/* Currently Reading */}
         <section className="bg-white rounded-xl row-span-3 row-start-2 col-start-1 p-4">
-          <h3 className="text-lg font-semibold">Currently Reading</h3>
+          <h3 className="text-lg font-semibold mb-4">Currently Reading</h3>
           <CurrentlyReading />
         </section>
 

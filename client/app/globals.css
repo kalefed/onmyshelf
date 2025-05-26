@@ -3,6 +3,9 @@
 @theme {
     --color-dark-orange: #F8B77D;
     --color-light-orange: #FFEEDF;
+    --color-dark-green: #879445;
+    --color-light-green: #EEF4CF;
+
 }
 
 :root {

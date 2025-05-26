@@ -39,18 +39,44 @@ export default function AddBookForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Add a new book</h2>
-      <div>
-        <label htmlFor="title">Title</label>
-        <input type="text" id="title" name="title" required />
-        <p>Jade City</p>
-      </div>
-      <div>
-        <label htmlFor="author">Author</label>
-        <input type="text" id="author" name="author" required></input>
-        <p>Fonda Lee</p>
-      </div>
-      <button type="submit">Add Book</button>
+      <fieldset className="grid grid-cols-1 gap-y-8">
+        <legend className="sr-only">
+          Add a new book to currently reading form
+        </legend>
+        <h1 className="text-2xl font-semibold">Add a new book</h1>
+        <div>
+          <label className="block text-sm/6 font-medium" htmlFor="title">
+            Title
+          </label>
+          <input
+            className="mt-2 rounded-md outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-dark-orange px-3 py-1.5 w-full"
+            type="text"
+            id="title"
+            name="title"
+            required
+          />
+          <p className="text-sm/8 text-gray-500">Jade City</p>
+        </div>
+        <div>
+          <label className="block text-sm/6 font-medium" htmlFor="author">
+            Author
+          </label>
+          <input
+            className="mt-2 rounded-md outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-dark-orange px-3 py-1.5 w-full"
+            type="text"
+            id="author"
+            name="author"
+            required
+          ></input>
+          <p className="text-sm/8 text-gray-500">Fonda Lee</p>
+        </div>
+        <button
+          className="bg-dark-orange rounded-xl px-4 py-2 hover:bg-light-orange text-sm w-fit"
+          type="submit"
+        >
+          Add Book
+        </button>
+      </fieldset>
     </form>
   );
 }
