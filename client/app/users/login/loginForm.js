@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "./loginForm.module.css";
 import { useMutation } from "@tanstack/react-query";
 import { userLogin } from "@/services/users";
 import { useRouter } from "next/navigation";
@@ -28,35 +27,42 @@ export default function LoginForm() {
   };
 
   return (
-    <div>
-      <form className={styles["login-form"]} onSubmit={handleSubmit}>
-        <div className={styles["login-form__group"]}>
-          <label htmlFor="username" className={styles["login-form__label"]}>
-            Username
-          </label>
-          <input
-            className={styles["login-form__input"]}
-            id="username"
-            type="text"
-            name="username"
-            required
-          />
-        </div>
-        <div className={styles["login-form__group"]}>
-          <label htmlFor="password" className={styles["login-form__label"]}>
-            Password
-          </label>
-          <input
-            className={styles["login-form__input"]}
-            id="password"
-            type="password"
-            name="password"
-            required
-          />
-        </div>
-        <button type="submit">Log In</button>
+    <section className="mt-10">
+      <form onSubmit={handleSubmit}>
+        <fieldset className="grid grid-cols-1 gap-y-8">
+          <legend className="sr-only">Login form</legend>
+          <div>
+            <label className="block text-sm/6 font-medium" htmlFor="username">
+              Username
+            </label>
+            <input
+              className="mt-2 rounded-md outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-dark-orange px-3 py-1.5 w-full"
+              id="username"
+              type="text"
+              name="username"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm/6 font-medium" htmlFor="password">
+              Password
+            </label>
+            <input
+              className="mt-2 rounded-md outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-dark-orange px-3 py-1.5 w-full"
+              id="password"
+              type="password"
+              name="password"
+              required
+            />
+          </div>
+          <button
+            className="bg-dark-orange rounded-xl px-4 py-2 hover:bg-light-orange text-sm w-fit"
+            type="submit"
+          >
+            Log In
+          </button>
+        </fieldset>
       </form>
-      <Link href="/users/register">Register instead</Link>
-    </div>
+    </section>
   );
 }
