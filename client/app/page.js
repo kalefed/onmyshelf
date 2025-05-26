@@ -14,11 +14,14 @@ export default async function Home({ searchParams }) {
           Welcome back, Kaleigh
         </h1>
       </header>
+
+      {/* Dashboard */}
       <section className="grid grid-cols-4 gap-4 grid-rows-6 mt-10 mx-4">
+        {/* Metric summary cards */}
         <section className="col-start-1 col-span-4 grid grid-cols-subgrid">
-          <div className="bg-white rounded-xl p-4">
+          <article className="bg-white rounded-xl p-4">
             <h3 className="text-lg font-semibold">Reading Challenge</h3>
-          </div>
+          </article>
           <div className="bg-white rounded-xl col-span-2 p-4">
             <h3 className="text-lg font-semibold">Reading Streak</h3>
           </div>
@@ -26,22 +29,33 @@ export default async function Home({ searchParams }) {
             <h3 className="text-lg font-semibold">Stats</h3>
           </div>
         </section>
+
+        {/* Currently Reading */}
         <section className="bg-white rounded-xl row-span-3 row-start-2 col-start-1 p-4">
           <h3 className="text-lg font-semibold">Currently Reading</h3>
           <CurrentlyReading />
         </section>
+
+        {/* Up Next */}
         <section className="bg-white rounded-xl row-span-3 row-start-2 col-start-2 p-4">
           <h3 className="text-lg font-semibold">Up Next</h3>
           <UpNext />
         </section>
+
+        {/* Reading Stats Overview */}
         <section className="bg-white rounded-xl col-span-2 row-span-6 row-start-2 col-start-3 p-4">
           <h3 className="text-lg font-semibold">Reading Stats</h3>
         </section>
+
+        {/* Want to Read */}
         <section className="bg-white rounded-xl col-span-2 row-span-3 col-start-1 row-start-5 p-4">
           <h3 className="text-lg font-semibold">Want to Read</h3>
           <WantToRead />
         </section>
       </section>
+
+      {/* Modal */}
+      {showModal && <BookFormModal />}
     </main>
   );
 }
