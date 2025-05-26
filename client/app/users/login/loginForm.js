@@ -55,14 +55,12 @@ export default function LoginForm() {
               required
             />
           </div>
-          <div className="flex">
-            <button
-              className="bg-dark-orange rounded-xl px-4 py-2 hover:bg-light-orange text-sm w-fit"
-              type="submit"
-            >
-              Log In
-            </button>
-          </div>
+          <button
+            className="bg-dark-orange rounded-xl px-4 py-2 hover:bg-light-orange text-sm w-fit"
+            type="submit"
+          >
+            Log In
+          </button>
         </fieldset>
       </form>
     </section>
