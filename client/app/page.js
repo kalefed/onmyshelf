@@ -2,7 +2,6 @@ import styles from "./Page.module.css";
 import CurrentlyReading from "../components/CurrentlyReading/CurrentlyReading";
 import ToBeRead from "../components/ToBeRead/ToBeRead";
 import BookFormModal from "../components/AddBookForm/BookFormModal";
-import LogoutButton from "@/components/buttons/logout";
 import UpNext from "@/components/UpNext/UpNext";
 import WantToRead from "@/components/WantToRead/WantToRead";
 
@@ -11,28 +10,27 @@ export default async function Home({ searchParams }) {
 
   return (
     <div>
-      <LogoutButton />
-      <h1 className={styles["heading"]}>Welcome back, Kaleigh</h1>
-      <div className={styles["home"]}>
-        <div className={styles["placeholder"]}>
+      <h1>Welcome back, Kaleigh</h1>
+      <div>
+        <div>
           <h3>Reading Challenge</h3>
         </div>
-        <div className={`${styles.placeholder} ${styles.placeholderStreaks}`}>
+        <div>
           <h3>Reading Streaks</h3>
         </div>
-        <div className={styles["placeholder"]}>
+        <div>
           <h3>Other</h3>
         </div>
-        <div className={styles["home_currently-reading"]}>
+        <div>
           <CurrentlyReading />
         </div>
-        <div className={styles["placeholder_1"]}>
+        <div>
           <h3>Reading Stats</h3>
         </div>
-        <div className={styles["home_want-to-read"]}>
+        <div>
           <WantToRead />
         </div>
-        <div className={styles["home_up-next"]}>
+        <div>
           <UpNext />
         </div>
       </div>

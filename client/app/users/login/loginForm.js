@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "./loginForm.module.css";
 import { useMutation } from "@tanstack/react-query";
 import { userLogin } from "@/services/users";
 import { useRouter } from "next/navigation";
@@ -29,30 +28,14 @@ export default function LoginForm() {
 
   return (
     <div>
-      <form className={styles["login-form"]} onSubmit={handleSubmit}>
-        <div className={styles["login-form__group"]}>
-          <label htmlFor="username" className={styles["login-form__label"]}>
-            Username
-          </label>
-          <input
-            className={styles["login-form__input"]}
-            id="username"
-            type="text"
-            name="username"
-            required
-          />
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="username">Username</label>
+          <input id="username" type="text" name="username" required />
         </div>
-        <div className={styles["login-form__group"]}>
-          <label htmlFor="password" className={styles["login-form__label"]}>
-            Password
-          </label>
-          <input
-            className={styles["login-form__input"]}
-            id="password"
-            type="password"
-            name="password"
-            required
-          />
+        <div>
+          <label htmlFor="password">Password</label>
+          <input id="password" type="password" name="password" required />
         </div>
         <button type="submit">Log In</button>
       </form>

@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "./AddBookForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addBook } from "@/services/books";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -39,33 +38,17 @@ export default function AddBookForm() {
   };
 
   return (
-    <form className={styles["book-form"]} onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       <h2>Add a new book</h2>
-      <div className={styles["book-form__group"]}>
-        <label className={styles["book-form__label"]} htmlFor="title">
-          Title
-        </label>
-        <input
-          className={styles["book-form__input"]}
-          type="text"
-          id="title"
-          name="title"
-          required
-        />
-        <p className={styles["book-form__placeholder"]}>Jade City</p>
+      <div>
+        <label htmlFor="title">Title</label>
+        <input type="text" id="title" name="title" required />
+        <p>Jade City</p>
       </div>
-      <div className={styles["book-form__group"]}>
-        <label className={styles["book-form__label"]} htmlFor="author">
-          Author
-        </label>
-        <input
-          className={styles["book-form__input"]}
-          type="text"
-          id="author"
-          name="author"
-          required
-        ></input>
-        <p className={styles["book-form__placeholder"]}>Fonda Lee</p>
+      <div>
+        <label htmlFor="author">Author</label>
+        <input type="text" id="author" name="author" required></input>
+        <p>Fonda Lee</p>
       </div>
       <button type="submit">Add Book</button>
     </form>

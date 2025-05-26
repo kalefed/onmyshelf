@@ -3,9 +3,9 @@ import styles from "./WantToRead.module.css";
 
 export default async function WantToRead() {
   return (
-    <div className={styles["want-to-read__container"]}>
+    <div>
       <h3>Want to read</h3>
-      <div className={styles["want-to-read__books"]}>
+      <div>
         {/* <button>
           <Link href="/?showModal=true">Add a book</Link>
         </button> */}

@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "./registerForm.module.css";
 import { useMutation } from "@tanstack/react-query";
 import { userRegister } from "@/services/users";
 import { useRouter } from "next/navigation";
@@ -27,42 +26,18 @@ export default function RegisterForm() {
   };
 
   return (
-    <form className={styles["register-form"]} onSubmit={handleSubmit}>
-      <div className={styles["register-form__group"]}>
-        <label htmlFor="email" className={styles["register-form__label"]}>
-          Email address
-        </label>
-        <input
-          className={styles["register-form__input"]}
-          id="email"
-          type="email"
-          name="email"
-          required
-        />
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="email">Email address</label>
+        <input id="email" type="email" name="email" required />
       </div>
-      <div className={styles["register-form__group"]}>
-        <label htmlFor="username" className={styles["register-form__label"]}>
-          Username
-        </label>
-        <input
-          className={styles["register-form__input"]}
-          id="username"
-          type="text"
-          name="username"
-          required
-        />
+      <div>
+        <label htmlFor="username">Username</label>
+        <input id="username" type="text" name="username" required />
       </div>
-      <div className={styles["register-form__group"]}>
-        <label htmlFor="password" className={styles["register-form__label"]}>
-          Password
-        </label>
-        <input
-          className={styles["register-form__input"]}
-          id="password"
-          type="password"
-          name="password"
-          required
-        />
+      <div>
+        <label htmlFor="password">Password</label>
+        <input id="password" type="password" name="password" required />
       </div>
       <button type="submit">Register</button>
     </form>
