@@ -38,18 +38,18 @@ export default async function Home({ searchParams }) {
 
         {/* Up Next */}
         <section className="bg-white rounded-xl row-span-3 row-start-2 col-start-2 p-4">
-          <h3 className="text-lg font-semibold">Up Next</h3>
+          <h3 className="text-lg font-semibold mb-4">Up Next</h3>
           <UpNext />
         </section>
 
         {/* Reading Stats Overview */}
         <section className="bg-white rounded-xl col-span-2 row-span-6 row-start-2 col-start-3 p-4">
-          <h3 className="text-lg font-semibold">Reading Stats</h3>
+          <h3 className="text-lg font-semibold mb-4">Reading Stats</h3>
         </section>
 
         {/* Want to Read */}
         <section className="bg-white rounded-xl col-span-2 row-span-3 col-start-1 row-start-5 p-4">
-          <h3 className="text-lg font-semibold">Want to Read</h3>
+          <h3 className="text-lg font-semibold mb-4">Want to Read</h3>
           <WantToRead />
         </section>
       </section>

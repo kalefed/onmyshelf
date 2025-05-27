@@ -3,8 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getBooksOnShelf } from "@/services/books";
 
-export default function CurrentlyReadingBooks() {
-  const shelf_type = "currently-reading";
+export default function BookList({ shelf_type }) {
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["books", shelf_type],
