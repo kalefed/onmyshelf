@@ -222,7 +222,7 @@ def add_book(shelf_id):
 
     if shelf:
         # Get genres list from incoming data
-        genre_names = data.get("genres", [])
+        genre_names = list({name.strip().lower() for name in data.get("genres", [])})
 
         # Create genre objects for each genre in the data
         genres = []
@@ -234,7 +234,6 @@ def add_book(shelf_id):
                 genre = Genre(name=name)
                 db.session.add(genre)
             genres.append(genre)
-    
 
         new_book = Book(
             title=data["title"],

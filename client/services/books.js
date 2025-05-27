@@ -33,6 +33,9 @@ export const addBook = async (formData) => {
   const newBook = {
     title: formData.get("title"),
     author: formData.get("author"),
+    format_type: formData.get("format_type"),
+    purchase_method: formData.get("purchase_method"),
+    genres: formData.get("genres"),
   };
 
   // Send the data to the API
