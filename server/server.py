@@ -18,7 +18,7 @@ from flask_jwt_extended import (
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
 
-from models import db, Book, User, TokenBlocklist, Shelf
+from models import db, Book, User, TokenBlocklist, Shelf, Genre
 
 load_dotenv()
 
@@ -221,11 +221,27 @@ def add_book(shelf_id):
     shelf = db.session.execute(stmt).scalars().first()
 
     if shelf:
+        # Get genres list from incoming data
+        genre_names = data.get("genres", [])
+
+        # Create genre objects for each genre in the data
+        genres = []
+        for name in genre_names:
+            stmt = select(Genre).filter_by(name=name)
+            genre = db.session.execute(stmt).scalars().first()
+
+            if not genre:
+                genre = Genre(name=name)
+                db.session.add(genre)
+            genres.append(genre)
+    
+
         new_book = Book(
             title=data["title"],
             author=data["author"],
             format_type=data["format_type"],
             shelf_id=shelf_id,
+            genres=genres,
         )
         db.session.add(new_book)
         db.session.commit()
