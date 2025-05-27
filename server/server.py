@@ -320,10 +320,10 @@ def get_or_create_default_user():
 
     if not existing_user:
         user = User(
-            username="defaultuser",
+            username="dev",
             email=default_email,
-            password="devpassword",
         )
+        user.set_password("dev")
         db.session.add(user)
         db.session.commit()
 
@@ -332,6 +332,99 @@ def get_or_create_default_user():
         for shelf_type in default_shelves:
             shelf = Shelf(shelf_type=shelf_type, user=user)
             db.session.add(shelf)
+
+        db.session.commit()
+
+        # Add some books
+        books_data = [
+            {
+                "title": "The Hobbit",
+                "author": "J.R.R. Tolkien",
+                "format_type": "physical",
+                "purchase_method": "library",
+                "genres": ["fantasy"],
+                "shelf": "currently-reading",
+            },
+            {
+                "title": "Lord of the rings",
+                "author": "J.R.R. Tolkien",
+                "format_type": "physical",
+                "purchase_method": "library",
+                "genres": ["fantasy"],
+                "shelf": "currently-reading",
+            },
+            {
+                "title": "Dune",
+                "author": "Frank Herbert",
+                "format_type": "physical",
+                "purchase_method": "bought",
+                "genres": ["science fiction"],
+                "shelf": "tbr",
+            },
+            {
+                "title": "Empire of Silence",
+                "author": "Christopher Ruocchio",
+                "format_type": "physical",
+                "purchase_method": "bought",
+                "genres": ["science fiction"],
+                "shelf": "tbr",
+            },
+            {
+                "title": "Ship of Magic",
+                "author": "Robin Hobb",
+                "format_type": "physical",
+                "purchase_method": "bought",
+                "genres": ["Fantasy", "Adult"],
+                "shelf": "tbr",
+            },
+            {
+                "title": "Book Lovers",
+                "author": "Emily Henry",
+                "format_type": "physical",
+                "purchase_method": "library",
+                "genres": ["Romance", "Adult"],
+                "shelf": "tbr",
+            },
+            {
+                "title": "Dune 2",
+                "author": "Frank Herbert",
+                "format_type": "audiobook",
+                "purchase_method": "library",
+                "genres": ["science fiction"],
+                "shelf": "up-next",
+            },
+            {
+                "title": "Malice",
+                "author": "John Gwynne",
+                "format_type": "physical",
+                "purchase_method": "bought",
+                "genres": ["fantasy"],
+                "shelf": "up-next",
+            },
+        ]
+
+        for book in books_data:
+            # Get Genre objects from names
+            genre_objects_list = []
+            for genre_name in book["genres"]:
+                genre = Genre.query.filter_by(name=genre_name).first()
+                if genre:
+                    genre_objects_list.append(genre)
+
+            # Get the actual Shelf object
+            shelf = Shelf.query.filter_by(
+                user_id=user.id, shelf_type=book["shelf"]
+            ).first()
+
+            new_book = Book(
+                title=book["title"],
+                author=book["author"],
+                format_type=book["format_type"],
+                purchase_method=book["purchase_method"],
+                shelf=shelf,
+                genres=genre_objects_list,
+            )
+            db.session.add(new_book)
 
         db.session.commit()
 
@@ -348,7 +441,7 @@ def handle_404(e):
 if __name__ == "__main__":
     # create the table schema in the database
     with app.app_context():
-        # db.drop_all()
+        db.drop_all()
         db.create_all()
         get_or_create_default_user()
 
