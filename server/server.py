@@ -17,8 +17,9 @@ from flask_jwt_extended import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
+import json
 
-from models import db, Book, User, TokenBlocklist, Shelf
+from models import db, Book, User, TokenBlocklist, Shelf, Genre
 
 load_dotenv()
 
@@ -216,12 +217,43 @@ def add_book(shelf_id):
     data = request.get_json()
     current_user = get_jwt_identity()
 
+    # Does the book exist already?
+    stmt = select(Book).filter_by(
+        title=data["title"], author=data["author"], shelf_id=shelf_id
+    )
+    existing_book = db.session.execute(stmt).scalars().first()
+
+    if existing_book:
+        return jsonify({"message": "Book already exists on this shelf"}), 400
+
     # Does the shelf exist?
     stmt = select(Shelf).filter_by(id=shelf_id, user_id=current_user)
     shelf = db.session.execute(stmt).scalars().first()
 
     if shelf:
-        new_book = Book(title=data["title"], author=data["author"], shelf_id=shelf_id)
+        # Get genres list from incoming data
+        genre_names = data.get("genres", [])
+        genre_names_list = json.loads(genre_names)
+
+        # Create genre objects for each genre in the data
+        genres = []
+        for name in genre_names_list:
+            stmt = select(Genre).filter_by(name=name)
+            genre = db.session.execute(stmt).scalar_one_or_none()
+
+            if not genre:
+                genre = Genre(name=name)
+                db.session.add(genre)
+
+            genres.append(genre)
+
+        new_book = Book(
+            title=data["title"],
+            author=data["author"],
+            format_type=data["format_type"],
+            shelf_id=shelf_id,
+            genres=genres,
+        )
         db.session.add(new_book)
         db.session.commit()
 
@@ -229,12 +261,6 @@ def add_book(shelf_id):
             jsonify(
                 {
                     "message": "Book added successfully.",
-                    "book": {
-                        "id": new_book.id,
-                        "title": new_book.title,
-                        "author": new_book.author,
-                        "shelf_id": new_book.shelf_id,
-                    },
                 }
             ),
             201,
