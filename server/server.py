@@ -270,6 +270,31 @@ def add_book(shelf_id):
         abort(404, description=f"No shelf with this id: `{shelf_id}` found.")
 
 
+# Get a specific book on a specific shelf
+@app.route("/api/shelves/<string:shelf_type>/books/<int:book_id>", methods=["GET"])
+@jwt_required()
+def get_shelf_book(shelf_type, book_id):
+    current_user = get_jwt_identity()
+
+    stmt = (
+        select(Book)
+        .join(Book.shelf)
+        .where(
+            Shelf.user_id == current_user,
+            Shelf.shelf_type == shelf_type,
+            Book.id == book_id,
+        )
+    )
+
+    # Execute the query
+    users_book = db.session.execute(stmt).scalars().first()
+
+    if users_book is None:
+        return jsonify({"error": "Book not found on this shelf."}), 404
+
+    return jsonify(users_book.to_dict()), 200
+
+
 # Move a new book from one shelf to another
 @app.route("/api/shelves/<int:shelf_id>/books/<int:id>", methods=["PUT"])
 @jwt_required()
