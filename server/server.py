@@ -322,7 +322,7 @@ def handle_404(e):
 if __name__ == "__main__":
     # create the table schema in the database
     with app.app_context():
-        db.drop_all()
+        # db.drop_all()
         db.create_all()
         get_or_create_default_user()
 
