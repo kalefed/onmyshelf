@@ -1,6 +1,24 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
+export const searchGoogleAPI = async (title, author) => {
+  const query = `${title} ${author}`;
+  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+    query
+  )}&maxResults=1`;
+
+  try {
+    const response = await axios.get(url);
+    if (response.data.items && response.data.items.length > 0) {
+      return response.data.items[0].volumeInfo;
+    }
+    return null;
+  } catch (error) {
+    console.error("Google Books API error:", error.message);
+    return null;
+  }
+};
+
 export const getBooksOnShelf = async (shelf_type) => {
   // Get the CSRF token from the cookie
   const csrfToken = Cookies.get("csrf_access_token");
@@ -30,18 +48,27 @@ export const addBook = async (formData) => {
   // Get the CSRF token from the cookie
   const csrfToken = Cookies.get("csrf_access_token");
 
+  const title = formData.get("title");
+  const author = formData.get("author");
+
+  const bookApiData = await searchGoogleAPI(title, author);
+
   const newBook = {
-    title: formData.get("title"),
-    author: formData.get("author"),
+    title: title,
+    author: author,
     format_type: formData.get("format_type"),
     purchase_method: formData.get("purchase_method"),
     genres: formData.get("genres"),
+    description: bookApiData?.description || null,
+    cover_image: bookApiData?.imageLinks?.medium || null,
+    page_count: bookApiData?.pageCount || null,
   };
 
   // Send the data to the API
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/shelves/5/books`,
+      // TODO - fix the hardcoded shelf number
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/shelves/1/books`,
       newBook,
       {
         headers: {

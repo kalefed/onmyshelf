@@ -253,6 +253,9 @@ def add_book(shelf_id):
             format_type=data["format_type"],
             shelf_id=shelf_id,
             genres=genres,
+            description=data["description"],
+            cover_image=data["cover_image"],
+            page_count=data["page_count"],
         )
         db.session.add(new_book)
         db.session.commit()
