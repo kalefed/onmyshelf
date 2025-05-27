@@ -221,7 +221,12 @@ def add_book(shelf_id):
     shelf = db.session.execute(stmt).scalars().first()
 
     if shelf:
-        new_book = Book(title=data["title"], author=data["author"], format_type=data["format_type"],shelf_id=shelf_id)
+        new_book = Book(
+            title=data["title"],
+            author=data["author"],
+            format_type=data["format_type"],
+            shelf_id=shelf_id,
+        )
         db.session.add(new_book)
         db.session.commit()
 
@@ -229,13 +234,6 @@ def add_book(shelf_id):
             jsonify(
                 {
                     "message": "Book added successfully.",
-                    "book": {
-                        "id": new_book.id,
-                        "title": new_book.title,
-                        "author": new_book.author,
-                        "shelf_id": new_book.shelf_id,
-                        "format_type": new_book.format_type,
-                    },
                 }
             ),
             201,

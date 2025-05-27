@@ -72,7 +72,6 @@ class Book(db.Model):
     author: Mapped[str] = mapped_column(db.String(255), nullable=False)
     shelf_id: Mapped[int] = mapped_column(ForeignKey("shelves.id"), nullable=False)
 
-    # ENUM fix: https://medium.com/@2019077_13406/making-python-enums-compatible-with-sqlalchemy-a-practical-solution-0b438e417fc5
     format_type: Mapped[FormatType] = mapped_column(
         SqlEnum(FormatType, values_callable=get_enum_values),
         nullable=True,
@@ -83,4 +82,9 @@ class Book(db.Model):
     shelf: Mapped["Shelf"] = relationship("Shelf", back_populates="books")
 
     def to_dict(self):
-        return {"id": self.id, "title": self.title, "author": self.author}
+        return {
+            "id": self.id,
+            "title": self.title,
+            "author": self.author,
+            "format_type": self.format_type.value if self.format_type else None,
+        }
