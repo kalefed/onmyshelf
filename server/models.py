@@ -1,10 +1,15 @@
 import datetime
+from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
+
+
+def get_enum_values(enum_class):
+    return [member.value for member in enum_class]
 
 
 class TokenBlocklist(db.Model):
@@ -52,6 +57,13 @@ class Shelf(db.Model):
         return {"id": self.id, "shelf_type": self.shelf_type, "user_id": self.user_id}
 
 
+# Define ENUMS for
+class FormatType(Enum):
+    audiobook = "audiobook"
+    physical = "physical"
+    ebook = "ebook"
+
+
 class Book(db.Model):
     __tablename__ = "books"
 
@@ -59,6 +71,13 @@ class Book(db.Model):
     title: Mapped[str] = mapped_column(db.String(255), nullable=False)
     author: Mapped[str] = mapped_column(db.String(255), nullable=False)
     shelf_id: Mapped[int] = mapped_column(ForeignKey("shelves.id"), nullable=False)
+
+    # ENUM fix: https://medium.com/@2019077_13406/making-python-enums-compatible-with-sqlalchemy-a-practical-solution-0b438e417fc5
+    format_type: Mapped[FormatType] = mapped_column(
+        SqlEnum(FormatType, values_callable=get_enum_values),
+        nullable=True,
+        default=FormatType.physical,
+    )
 
     # Defining relationships
     shelf: Mapped["Shelf"] = relationship("Shelf", back_populates="books")
