@@ -96,6 +96,9 @@ class Book(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(db.String(255), nullable=False)
     author: Mapped[str] = mapped_column(db.String(255), nullable=False)
+    description: Mapped[str] = mapped_column(db.String(), nullable=True)
+    cover_image: Mapped[str] = mapped_column(db.String(255), nullable=True)
+    page_count: Mapped[int] = mapped_column(db.Integer, nullable=True)
     shelf_id: Mapped[int] = mapped_column(ForeignKey("shelves.id"), nullable=False)
 
     format_type: Mapped[FormatType] = mapped_column(
@@ -120,6 +123,9 @@ class Book(db.Model):
             "id": self.id,
             "title": self.title,
             "author": self.author,
+            "description": self.description,
+            "cover_image": self.cover_image,
+            "page_count": self.page_count,
             "format_type": self.format_type.value if self.format_type else None,
             "genres": [genre.name for genre in self.genres],
         }

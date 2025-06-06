@@ -2,7 +2,16 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
-from flask import Flask, abort, jsonify, redirect, request, session, url_for
+from flask import (
+    Flask,
+    abort,
+    jsonify,
+    redirect,
+    request,
+    session,
+    url_for,
+    send_from_directory,
+)
 from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager,
@@ -18,6 +27,7 @@ from flask_jwt_extended import (
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
 import json
+from werkzeug.utils import secure_filename
 
 from models import db, Book, User, TokenBlocklist, Shelf, Genre
 
@@ -44,11 +54,21 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_COOKIE_SAMESITE"] = "Lax"
 
+# Configuration for file uploads
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 # DB initialization
 db.init_app(app)
 
 # JWT & bycrypt Initialization
 jwt = JWTManager(app)
+
+
+# Helper function for cover image's to check if file extension is allowed
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 # Endpoints
@@ -214,8 +234,27 @@ def get_shelf_books(shelf_type):
 @app.route("/api/shelves/<int:shelf_id>/books", methods=["POST"])
 @jwt_required()
 def add_book(shelf_id):
-    data = request.get_json()
+    # get the data
+    fields = [
+        "title",
+        "author",
+        "format_type",
+        "purchase_method",
+        "description",
+        "page_count",
+        "genres",
+    ]
+    data = {field: request.form.get(field) for field in fields}
     current_user = get_jwt_identity()
+
+    # Get the book cover file and save it to upload folder
+    cover_image_path = None
+    file = request.files.get("cover_image")
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(file_path)
+        cover_image_path = os.path.join(file_path)
 
     # Does the book exist already?
     stmt = select(Book).filter_by(
@@ -253,6 +292,9 @@ def add_book(shelf_id):
             format_type=data["format_type"],
             shelf_id=shelf_id,
             genres=genres,
+            description=data["description"],
+            cover_image=cover_image_path,
+            page_count=data["page_count"],
         )
         db.session.add(new_book)
         db.session.commit()
@@ -268,6 +310,36 @@ def add_book(shelf_id):
 
     else:
         abort(404, description=f"No shelf with this id: `{shelf_id}` found.")
+
+
+@app.route("/app/uploads/<filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+
+# Get a specific book on a specific shelf
+@app.route("/api/shelves/<string:shelf_type>/books/<int:book_id>", methods=["GET"])
+@jwt_required()
+def get_shelf_book(shelf_type, book_id):
+    current_user = get_jwt_identity()
+
+    stmt = (
+        select(Book)
+        .join(Book.shelf)
+        .where(
+            Shelf.user_id == current_user,
+            Shelf.shelf_type == shelf_type,
+            Book.id == book_id,
+        )
+    )
+
+    # Execute the query
+    users_book = db.session.execute(stmt).scalars().first()
+
+    if users_book is None:
+        return jsonify({"error": "Book not found on this shelf."}), 404
+
+    return jsonify(users_book.to_dict()), 200
 
 
 # Move a new book from one shelf to another
@@ -320,10 +392,10 @@ def get_or_create_default_user():
 
     if not existing_user:
         user = User(
-            username="defaultuser",
+            username="dev",
             email=default_email,
-            password="devpassword",
         )
+        user.set_password("dev")
         db.session.add(user)
         db.session.commit()
 
@@ -332,6 +404,99 @@ def get_or_create_default_user():
         for shelf_type in default_shelves:
             shelf = Shelf(shelf_type=shelf_type, user=user)
             db.session.add(shelf)
+
+        db.session.commit()
+
+        # Add some books
+        books_data = [
+            {
+                "title": "The Hobbit",
+                "author": "J.R.R. Tolkien",
+                "format_type": "physical",
+                "purchase_method": "library",
+                "genres": ["fantasy"],
+                "shelf": "currently-reading",
+            },
+            {
+                "title": "Lord of the rings",
+                "author": "J.R.R. Tolkien",
+                "format_type": "physical",
+                "purchase_method": "library",
+                "genres": ["fantasy"],
+                "shelf": "currently-reading",
+            },
+            {
+                "title": "Dune",
+                "author": "Frank Herbert",
+                "format_type": "physical",
+                "purchase_method": "bought",
+                "genres": ["science fiction"],
+                "shelf": "tbr",
+            },
+            {
+                "title": "Empire of Silence",
+                "author": "Christopher Ruocchio",
+                "format_type": "physical",
+                "purchase_method": "bought",
+                "genres": ["science fiction"],
+                "shelf": "tbr",
+            },
+            {
+                "title": "Ship of Magic",
+                "author": "Robin Hobb",
+                "format_type": "physical",
+                "purchase_method": "bought",
+                "genres": ["Fantasy", "Adult"],
+                "shelf": "tbr",
+            },
+            {
+                "title": "Book Lovers",
+                "author": "Emily Henry",
+                "format_type": "physical",
+                "purchase_method": "library",
+                "genres": ["Romance", "Adult"],
+                "shelf": "tbr",
+            },
+            {
+                "title": "Dune 2",
+                "author": "Frank Herbert",
+                "format_type": "audiobook",
+                "purchase_method": "library",
+                "genres": ["science fiction"],
+                "shelf": "up-next",
+            },
+            {
+                "title": "Malice",
+                "author": "John Gwynne",
+                "format_type": "physical",
+                "purchase_method": "bought",
+                "genres": ["fantasy"],
+                "shelf": "up-next",
+            },
+        ]
+
+        for book in books_data:
+            # Get Genre objects from names
+            genre_objects_list = []
+            for genre_name in book["genres"]:
+                genre = Genre.query.filter_by(name=genre_name).first()
+                if genre:
+                    genre_objects_list.append(genre)
+
+            # Get the actual Shelf object
+            shelf = Shelf.query.filter_by(
+                user_id=user.id, shelf_type=book["shelf"]
+            ).first()
+
+            new_book = Book(
+                title=book["title"],
+                author=book["author"],
+                format_type=book["format_type"],
+                purchase_method=book["purchase_method"],
+                shelf=shelf,
+                genres=genre_objects_list,
+            )
+            db.session.add(new_book)
 
         db.session.commit()
 
@@ -348,7 +513,7 @@ def handle_404(e):
 if __name__ == "__main__":
     # create the table schema in the database
     with app.app_context():
-        # db.drop_all()
+        db.drop_all()
         db.create_all()
         get_or_create_default_user()
 
