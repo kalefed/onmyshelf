@@ -2,7 +2,16 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
-from flask import Flask, abort, jsonify, redirect, request, session, url_for
+from flask import (
+    Flask,
+    abort,
+    jsonify,
+    redirect,
+    request,
+    session,
+    url_for,
+    send_from_directory,
+)
 from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager,
@@ -18,6 +27,7 @@ from flask_jwt_extended import (
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
 import json
+from werkzeug.utils import secure_filename
 
 from models import db, Book, User, TokenBlocklist, Shelf, Genre
 
@@ -44,11 +54,21 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_COOKIE_SAMESITE"] = "Lax"
 
+# Configuration for file uploads
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 # DB initialization
 db.init_app(app)
 
 # JWT & bycrypt Initialization
 jwt = JWTManager(app)
+
+
+# Helper function for cover image's to check if file extension is allowed
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 # Endpoints
@@ -214,8 +234,27 @@ def get_shelf_books(shelf_type):
 @app.route("/api/shelves/<int:shelf_id>/books", methods=["POST"])
 @jwt_required()
 def add_book(shelf_id):
-    data = request.get_json()
+    # get the data
+    fields = [
+        "title",
+        "author",
+        "format_type",
+        "purchase_method",
+        "description",
+        "page_count",
+        "genres",
+    ]
+    data = {field: request.form.get(field) for field in fields}
     current_user = get_jwt_identity()
+
+    # Get the book cover file and save it to upload folder
+    cover_image_path = None
+    file = request.files.get("cover_image")
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(file_path)
+        cover_image_path = os.path.join(file_path)
 
     # Does the book exist already?
     stmt = select(Book).filter_by(
@@ -254,7 +293,7 @@ def add_book(shelf_id):
             shelf_id=shelf_id,
             genres=genres,
             description=data["description"],
-            cover_image=data["cover_image"],
+            cover_image=cover_image_path,
             page_count=data["page_count"],
         )
         db.session.add(new_book)
@@ -271,6 +310,11 @@ def add_book(shelf_id):
 
     else:
         abort(404, description=f"No shelf with this id: `{shelf_id}` found.")
+
+
+@app.route("/app/uploads/<filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
 # Get a specific book on a specific shelf

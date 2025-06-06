@@ -72,9 +72,24 @@ export default function AddBookForm() {
           ></input>
           <p className="text-sm/8 text-gray-500">Fonda Lee</p>
         </div>
+        <div>
+          <label className="block text-sm/6 font-medium" htmlFor="cover_image">
+            Upload Cover Image
+          </label>
+          <input
+            id="cover_image"
+            type="file"
+            name="cover_image"
+            className="text-sm/6"
+            accept="image/*"
+          />
+        </div>
         <div className="flex flex-row justify-between gap-4">
           <div className="flex-1">
-            <label className="block text-sm/6 font-medium" htmlFor="format_type">
+            <label
+              className="block text-sm/6 font-medium"
+              htmlFor="format_type"
+            >
               Format Type
             </label>
             <select
@@ -88,7 +103,10 @@ export default function AddBookForm() {
             </select>
           </div>
           <div className="flex-1">
-            <label className="block text-sm/6 font-medium" htmlFor="purchase_method">
+            <label
+              className="block text-sm/6 font-medium"
+              htmlFor="purchase_method"
+            >
               Purchase Method
             </label>
             <select

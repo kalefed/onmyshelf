@@ -22,11 +22,16 @@ export default function BookList({ shelf_type }) {
           <li key={book.id}>
             <div className="outline-1 outline-gray-300 rounded-md mb-2 w-[175px] h-[275px]">
               <Image
-                src={book.cover_image || "/plain.jpg"}
+                src={
+                  book.cover_image
+                    ? `${process.env.NEXT_PUBLIC_SERVER_URL}${book.cover_image}`
+                    : "/plain.jpg"
+                }
                 width={200}
                 height={300}
                 alt={`Cover of ${book.title}`}
                 className="object-fill rounded-md w-full h-full"
+                unoptimized
               />
             </div>
 

@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 export const searchGoogleAPI = async (title, author) => {
-  const query = `${title} ${author}`;
+  const query = `intitle:${title}+inauthor:${author}`;
   const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
     query
   )}&maxResults=1`;
@@ -48,31 +48,32 @@ export const addBook = async (formData) => {
   // Get the CSRF token from the cookie
   const csrfToken = Cookies.get("csrf_access_token");
 
+  const coverFile = formData.get("cover_image");
   const title = formData.get("title");
   const author = formData.get("author");
 
   const bookApiData = await searchGoogleAPI(title, author);
 
-  const newBook = {
-    title: title,
-    author: author,
-    format_type: formData.get("format_type"),
-    purchase_method: formData.get("purchase_method"),
-    genres: formData.get("genres"),
-    description: bookApiData?.description || null,
-    cover_image: bookApiData?.imageLinks?.medium || null,
-    page_count: bookApiData?.pageCount || null,
-  };
+  formData.append("page_count", bookApiData?.pageCount || null);
+  formData.append("description", bookApiData?.description || null);
+  // Only append google book api cover if no cover image was uploaded
+  if (
+    (coverFile.name == "" || coverFile.size === 0) &&
+    bookApiData?.imageLinks?.thumbnail
+  ) {
+    formData.append("cover_image_url", bookApiData.imageLinks.thumbnail);
+  }
 
   // Send the data to the API
   try {
     const response = await axios.post(
       // TODO - fix the hardcoded shelf number
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/shelves/1/books`,
-      newBook,
+      formData,
       {
         headers: {
           "X-CSRF-TOKEN": csrfToken,
+          "Content-Type": "multipart/form-data",
         },
         withCredentials: true, // Include cookies (JWT token)
       }

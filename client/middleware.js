@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export function middleware(request) {
   const csrfToken = request.cookies.get("csrf_access_token");
-  const url = request.nextUrl.clone(); // 🔧 Fix: properly clone the URL
+  const url = request.nextUrl.clone();
 
   console.log("middleware test", csrfToken);
 
@@ -16,5 +16,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/"], // Optionally: add more protected routes like "/dashboard"
+  matcher: ["/"],
 };
